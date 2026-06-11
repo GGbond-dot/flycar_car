@@ -37,4 +37,8 @@
 | M1 位姿桥(fly_car 侧 pose_sender_pkg + 车侧 leader_pose_receiver,UDP) | 🔶 代码完成(2026-06-11),待组网+双板联调;发送端 target_ip 按组网实配 |
 | M2 follower_node 面包屑跟随 + 安全(超时刹停/过近保持) | 🔶 代码完成(2026-06-11),待上板 RViz 验证 |
 | M3 diff_drive_controller(/target_position→/cmd_vel)+ 底盘桥 $VW 流式通道 | 🔶 代码完成(2026-06-11),待实车闭环调参;chassis_timeout 仅 follow.launch 开启 |
-| M4 紧贴对接装货 | ⬜ 后续(需近距传感器,激光测距/ToF 之类) |
+| 联调前置:组网(热点/静态IP/双板域ID)、pose_sender target_ip 实配、align_dx/dy/dyaw 摆位标定 | ⬜ 需硬件,无代码量 |
+| 跟随触发逻辑(谁发 /follow_enable,车端任务状态机) | ⬜ 待实现,依赖比赛流程定义;当前手动 `ros2 topic pub` |
+| 双向任务通信(起飞/装货完成等握手,UDP 包型扩展,reserved 字段预留) | ⬜ 待实现,M4 前置 |
+| M4 紧贴对接装货(DOCK/LOAD:近距传感器选型、对接控制、$SERVO 装货动作、撤离) | ⬜ 后续,另立文档 |
+| Phase 2 增强(车雷达直接检测飞车修正对齐;leader 附近扇区伪墙滤波) | ⬜ 可选,联调发现问题再做 |
