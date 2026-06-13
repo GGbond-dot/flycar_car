@@ -32,6 +32,16 @@ is_active() { nmcli -g NAME connection show --active 2>/dev/null | grep -qx "$CO
 peer_ok()   { ping -c1 -W1 "$PEER_IP" >/dev/null 2>&1; }
 start_ap()  { ros2 launch wifi_ap_manager open_ap.launch.py action:=start >>"$LOG" 2>&1; }
 
+# ---- 自启动总开关(标志位):~/.flycar_wifi_autostart 为 true 才开局域网 ----
+# false 时本脚本直接退出,wlan0 全程不进 AP 模式 -> NetworkManager 自动连上网 Wi-Fi。
+# 切换靠 stop_wifi.sh true|false + 重启(避开本板 AP->STA 驱动切不干净的问题)。
+FLAG_FILE="$HOME/.flycar_wifi_autostart"
+WIFI_FLAG="$(cat "$FLAG_FILE" 2>/dev/null || echo true)"
+if [ "$WIFI_FLAG" != "true" ]; then
+  log "自启动标志=false(见 $FLAG_FILE),跳过开 AP/心跳;wlan0 交给 NetworkManager 自动上网"
+  exit 0
+fi
+
 trap 'log "autostart_wifi 退出"; exit 0' INT TERM
 
 log "=== autostart_wifi 启动: ws=$WS_ROOT conn=$CONN peer=$PEER_IP interval=${INTERVAL}s ==="
