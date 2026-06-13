@@ -24,7 +24,7 @@
 ### 功能包 / 硬件资料
 - [SR5E1E3 底盘调试指南](../src/orangepi_to_car/SR5E1E3_CHASSIS_DEBUG_GUIDE.md) — 底盘串口协议全集($VW/$STOP/$MODE/IMU/超时保护)、PID 调参、接线。底盘是**差速驱动,不能横移**。
 - [orangepi_to_car 包说明](../src/orangepi_to_car/README.md) — 底盘桥现有 /car_movement 离散命令接口。
-- `wifi_ap_manager`(暂无独立文档):用 nmcli 把 `wlan0` 开成开放热点(AP),SSID `OPi_ROS2_TEST`,固定 `192.168.50.1/24`,`ipv4.method=shared` 自带 DHCP/NAT,作整个局域网的基站+网关。节点 `ap_manager`,action `start`/`stop`/`status`,`ros2 launch wifi_ap_manager open_ap.launch.py` 拉起。对端飞车连接见 `fly_car/src/wifi_sta_manager`。**开机自启动 + 心跳**:`car/scripts/autostart_wifi.sh`(仿 `kian_26fly/scripts/autostart_fly.sh` 套路的自包含单脚本,自动解析 `WS_ROOT=scripts/..`、`source` ROS+install、日志 `~/wifi_logs/wifi_ap.log`)。心跳循环每 5s 保证 AP 处于 up,掉了自动重拉(ping 飞车 `.2` 仅作日志,飞车没开不重建 AP)。**加到桌面"会话与启动"命令直接填本脚本绝对路径**(无需 .desktop/.service,登录用户身份、免 sudo)。停止用同目录 `stop_wifi.sh`。
+- [双机自组局域网 + Wi-Fi 自启动(车侧)](wifi_lan_autostart.md) — `wifi_ap_manager`(开放热点 AP,`192.168.50.1`) + `scripts/autostart_wifi.sh` 标志位机制(`stop_wifi.sh true/false` + 重启,规避本板 AP→STA 切换坑)。拓扑/单网卡两个硬约束/上板验证全在此。
 
 ### 修改 / 开发记录
 - [车上原有代码融合记录](onboard_code_merge_record.md) — flycar_car(1).zip 的取舍清单与由此引发的设计更新(差速底盘、域 ID=10 等)。
