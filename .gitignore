@@ -19,9 +19,7 @@ venv/
 env/
 
 # Editor-generated caches
-.vscode/*.db
-.vscode/*.db-*
-.vscode/*.vc.db*
+.vscode/
 
 # Local OS/editor noise
 .DS_Store
