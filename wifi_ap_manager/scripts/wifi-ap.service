@@ -1,0 +1,17 @@
+# 车(AP)Wi-Fi 自启动 + 心跳。安装:
+#   sudo cp wifi-ap.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now wifi-ap.service
+# ExecStart 路径按车板实际工作区调整(与 wifi_keepalive.sh 一致)。
+[Unit]
+Description=kian_flycar Wi-Fi AP (car) auto-start + heartbeat
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=simple
+ExecStart=/home/orangepi/kian_flycar/src/wifi_ap_manager/scripts/wifi_keepalive.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
