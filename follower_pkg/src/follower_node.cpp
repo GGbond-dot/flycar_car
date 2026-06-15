@@ -55,6 +55,7 @@ public:
     declare_parameter<double>("prune_margin_cm", 50.0);       // 弧长超出 d_follow+margin 的旧点丢弃
     declare_parameter<double>("leader_timeout_s", 0.5);       // 位姿超时判定
     declare_parameter<double>("publish_rate_hz", 20.0);       // 目标点发布频率
+    declare_parameter<bool>("auto_follow", true);             // 首帧有效 leader_pose 自动进 FOLLOW,无需手动 /follow_enable
 
     d_follow_m_ = get_parameter("d_follow_cm").as_double() / 100.0;
     d_min_m_ = get_parameter("d_min_cm").as_double() / 100.0;
@@ -62,6 +63,7 @@ public:
     prune_margin_m_ = get_parameter("prune_margin_cm").as_double() / 100.0;
     leader_timeout_s_ = get_parameter("leader_timeout_s").as_double();
     publish_rate_hz_ = get_parameter("publish_rate_hz").as_double();
+    auto_follow_ = get_parameter("auto_follow").as_bool();
 
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -104,6 +106,13 @@ private:
 
     last_leader_time_ = now();
     has_leader_pose_ = true;
+
+    // 自动触发:收到首帧有效 leader_pose 即进入 FOLLOW(无需手动 /follow_enable)。
+    // 仍可用 /follow_enable=false 手动停。
+    if (auto_follow_ && state_ == State::IDLE) {
+      state_ = State::FOLLOW;
+      RCLCPP_INFO(get_logger(), "auto_follow: 收到首帧 leader_pose -> FOLLOW");
+    }
 
     // 面包屑入队:leader 相对队尾移动够远才记一个点
     if (breadcrumbs_.empty() || dist2D(breadcrumbs_.back(), leader_pose_) >= spacing_m_) {
@@ -243,6 +252,7 @@ private:
   double prune_margin_m_;
   double leader_timeout_s_;
   double publish_rate_hz_;
+  bool auto_follow_;
 
   // 状态
   State state_;

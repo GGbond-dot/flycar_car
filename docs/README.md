@@ -24,7 +24,7 @@
 ### 功能包 / 硬件资料
 - [SR5E1E3 底盘调试指南](../src/orangepi_to_car/SR5E1E3_CHASSIS_DEBUG_GUIDE.md) — 底盘串口协议全集($VW/$STOP/$MODE/IMU/超时保护)、PID 调参、接线。底盘是**差速驱动,不能横移**。
 - [orangepi_to_car 包说明](../src/orangepi_to_car/README.md) — 底盘桥现有 /car_movement 离散命令接口。
-- [双机自组局域网 + Wi-Fi 自启动(车侧)](wifi_lan_autostart.md) — `wifi_ap_manager`(开放热点 AP,`192.168.50.1`) + `scripts/autostart_wifi.sh` 标志位机制(`stop_wifi.sh true/false` + 重启,规避本板 AP→STA 切换坑)。拓扑/单网卡两个硬约束/上板验证全在此。
+- [双机自组局域网 + Wi-Fi 自启动(车侧)](wifi_lan_autostart.md) — **⚠ 旧自建热点方案已作废(2026-06-14 改路由器)**,`wifi_ap_manager`/`autostart_wifi.sh`/标志位均不再启动。现状(路由器 autoconnect、`192.168.10.x`、域走 bashrc)见 [飞车端 wifi_lan_autostart](../../fly_car/docs/wifi_lan_autostart.md) §七。本文 AP 内容仅作历史/避坑参考。
 
 ### 修改 / 开发记录
 - [车上原有代码融合记录](onboard_code_merge_record.md) — flycar_car(1).zip 的取舍清单与由此引发的设计更新(差速底盘、域 ID=10 等)。
@@ -38,7 +38,7 @@
 | M1 位姿桥(fly_car 侧 pose_sender_pkg + 车侧 leader_pose_receiver,UDP) | 🔶 代码完成(2026-06-11),待组网+双板联调;发送端 target_ip 按组网实配 |
 | M2 follower_node 面包屑跟随 + 安全(超时刹停/过近保持) | 🔶 代码完成(2026-06-11),待上板 RViz 验证 |
 | M3 diff_drive_controller(/target_position→/cmd_vel)+ 底盘桥 $VW 流式通道 | 🔶 代码完成(2026-06-11),待实车闭环调参;chassis_timeout 仅 follow.launch 开启 |
-| 联调前置:组网(热点/静态IP/双板域ID)、align_dx/dy/dyaw 摆位标定 | 🔶 组网已落地:车端 `wifi_ap_manager`(AP,192.168.50.1) + 飞车 `wifi_sta_manager`(STA,静态 192.168.50.2),pose_sender target_ip 默认改 192.168.50.1。两边 launch 拉起,待上板实测;摆位标定仍需硬件 |
+| 联调前置:组网(路由器/静态IP/双板域ID)、align_dx/dy/dyaw 摆位标定 | 🔶 **组网已改路由器(2026-06-15 更新)**:弃用香橙派自建热点,车与飞车均开机 autoconnect 独立路由器(网段 `192.168.10.x`,车 `.161` / 飞车 `.171`)。`wifi_ap_manager`/`wifi_sta_manager`/标志位/心跳那套作废、**直接绕过不启动**;pose_sender `target_ip` 已改 `192.168.10.161`(端口 8888)。**域隔离走各板 `~/.bashrc` `export ROS_DOMAIN_ID`**(车=10/飞车非10)。align_dx/dy/dyaw 仍待现场标定 |
 | 跟随触发逻辑(谁发 /follow_enable,车端任务状态机) | ⬜ 待实现,依赖比赛流程定义;当前手动 `ros2 topic pub` |
 | 双向任务通信(起飞/装货完成等握手,UDP 包型扩展,reserved 字段预留) | ⬜ 待实现,M4 前置 |
 | M4 紧贴对接装货(DOCK/LOAD:近距传感器选型、对接控制、$SERVO 装货动作、撤离) | ⬜ 后续,另立文档 |
